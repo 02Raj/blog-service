@@ -2,11 +2,11 @@ name: Deploy Spring Boot to EC2
 
 on:
   push:
-    branches: [ master ]  # Jab master branch me push hoga, tab ye chalega
+    branches: [ master ]
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # GitHub Actions runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -15,19 +15,22 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'     # Java distribution (OpenJDK)
-          java-version: '17'         # Java version
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Build with Maven
-        run: mvn clean package -DskipTests
+      - name: Grant execute permission to Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
 
       - name: Copy .jar file to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.EC2_HOST }}      # EC2 public IP
+          host: ${{ secrets.EC2_HOST }}
           username: ec2-user
-          key: ${{ secrets.EC2_KEY }}        # PEM file content (saved as GitHub Secret)
-          source: "target/*.jar"
+          key: ${{ secrets.EC2_KEY }}
+          source: "build/libs/*.jar"
           target: "/home/ec2-user/app"
 
       - name: SSH and run jar
