@@ -1,7 +1,7 @@
 # Devblog Project Architecture
 
 This document outlines the project structure for the Devblog application.
-
+echo "# Deploy Trigger"
 ```
 devblog/
 ├── .gitattributes
