@@ -2,39 +2,40 @@ name: Deploy Spring Boot to EC2
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master ]  # Jab master branch me push hoga, tab ye chalega
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # GitHub Actions runner
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Java
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'     # Java distribution (OpenJDK)
+          java-version: '17'         # Java version
 
-    - name: Build with Maven
-      run: mvn clean package -DskipTests
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
 
-    - name: Copy .jar file to EC2
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ec2-user
-        key: ${{ secrets.EC2_KEY }}
-        source: "target/*.jar"
-        target: "/home/ec2-user/app"
+      - name: Copy .jar file to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}      # EC2 public IP
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}        # PEM file content (saved as GitHub Secret)
+          source: "target/*.jar"
+          target: "/home/ec2-user/app"
 
-    - name: SSH and run jar
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ec2-user
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          pkill -f 'java -jar' || true
-          nohup java -jar /home/ec2-user/app/*.jar > app.log 2>&1 &
+      - name: SSH and run jar
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            pkill -f 'java -jar' || true
+            nohup java -jar /home/ec2-user/app/*.jar > app.log 2>&1 &
