@@ -15,16 +15,16 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'  # ✅ Add this to avoid "distribution" error
 
-      - name: Grant execute permission to Gradle wrapper
+      - name: Grant execute permission for Gradle wrapper
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build -x test
+        run: ./gradlew clean build -x test  # ✅ Skip tests
 
-      - name: Copy .jar file to EC2
+      - name: Copy JAR file to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -33,7 +33,7 @@ jobs:
           source: "build/libs/*.jar"
           target: "/home/ec2-user/app"
 
-      - name: SSH and run jar
+      - name: SSH into EC2 and run app
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -42,3 +42,5 @@ jobs:
           script: |
             pkill -f 'java -jar' || true
             nohup java -jar /home/ec2-user/app/*.jar > app.log 2>&1 &
+            sleep 5
+            exit 0
