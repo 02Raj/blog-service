@@ -1,0 +1,22 @@
+# Ignore Maven / Gradle build output
+target/
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# VS Code (optional if you're using it)
+.vscode/
